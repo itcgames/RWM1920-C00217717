@@ -106,10 +106,7 @@ public class LaunchControls : MonoBehaviour
         while (armRB.transform.rotation.z >= -0.86f)
         {
              armRB.transform.Rotate(0.0f, 0.0f, -WeigthForce);
-             Vector3 move = new Vector3(-WeigthForce * 50,0,0); 
-             fullTreb.GetComponent<Rigidbody2D>().MovePosition(move);
-
-         yield return null;
+            yield return null;
         }
 
         if (armRB.transform.rotation.z <= -0.86f)
