@@ -6,6 +6,7 @@ TagManager:
   tags:
   - TrebArm
   - FullTrebBody
+  - ball
   layers:
   - Default
   - TransparentFX
