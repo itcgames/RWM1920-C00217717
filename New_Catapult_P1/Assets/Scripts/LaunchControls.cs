@@ -9,22 +9,47 @@ public class LaunchControls : MonoBehaviour
     private Vector2 initialPos;
     public Joint2D breakableJoint;
 
+    public AudioSource creakSound;
+    public AudioSource launchSound;
+    
+
     public Text m_infoText;
+    public Text instructions;
 
     public GameObject weight;
+
     bool isrotating = false;
     float rotation = 0;
     float WeigthForce = 0;
+
+
+    //Setup variables For Trebuchet Reset;
+    float resetWeight;
+    Vector3 resetPosition;
+    float resetRotation;
+        
+
     // Start is called before the first frame update
     void Start()
     {
-
         initialPos = new Vector2(0, 4.5f);
         armRB = GetComponent<Rigidbody2D>();
         armRB.centerOfMass = new Vector2(0.7f, .3f);
 
         WeigthForce = weight.GetComponent<Rigidbody2D>().mass * 0.001f;
 
+        resetPosition = fullTreb.transform.position;
+        resetRotation = armRB.transform.localRotation.z;
+        resetWeight = weight.GetComponent<Rigidbody2D>().mass;
+        instructions.text = "";
+        m_infoText.text = "";
+
+    }
+
+    private void Reset()
+    {
+        fullTreb.transform.position = resetPosition ;
+        armRB.transform.localRotation = Quaternion.Euler(0,0,37f);
     }
 
     void ProcessEvents()
@@ -34,17 +59,21 @@ public class LaunchControls : MonoBehaviour
         {
             ChangeHeight(-2);
             Debug.Log("rotation: " +  armRB.transform.localRotation.z.ToString());
+            creakSound.Play();
         }
+
          if (Input.GetKey(KeyCode.Comma))
         {
             
             ChangeHeight(2);
          Debug.Log("rotation: " +  armRB.transform.localRotation.z.ToString());
+         creakSound.Play();
         }
         
         if (Input.GetKeyUp(KeyCode.PageUp))
         {
             ChangeWeight(1);
+            
         }
        
         if (Input.GetKeyUp(KeyCode.PageDown))
@@ -55,20 +84,32 @@ public class LaunchControls : MonoBehaviour
         if (Input.GetKey(KeyCode.Space))
         {
            isrotating = true;
+            
         }
+    
     }
+    
 
     void FixedUpdate()
     {
         transform.localPosition = initialPos;
-      
-        if(isrotating)
+
+        if (breakableJoint.connectedBody != null)
+        {
+            if (isrotating)
         {
             StartCoroutine(autoRotateArm());
         }
         ProcessEvents();
-      
-       m_infoText.text = "Launch Arm Angle: " +  (armRB.transform.localRotation.z* 100).ToString() + "\nMass Of Weight: " + weight.GetComponent<Rigidbody2D>().mass.ToString();
+            m_infoText.text = "Launch Arm Angle: " + (armRB.transform.localRotation.z * 100).ToString() + "\nLaunch Force: " + weight.GetComponent<Rigidbody2D>().mass.ToString();
+            instructions.text = "Lower Launch Height: ' , ' Key \nRaise Launch Height: '.' Key \nIncrease Launch Force: ' PG UP ' \nDecrease Launch Force: ' PG DN' \nLaunch Catapult : SPACE";
+        }
+        else
+        {
+            instructions.text = "";
+            m_infoText.text = "";
+        }
+       
     }
 
     void ChangeWeight(int t_changeVal)
@@ -82,19 +123,19 @@ public class LaunchControls : MonoBehaviour
     {
         Debug.Log("change Weight");
 
-        if (armRB.transform.rotation.z >= -0.35f && armRB.transform.rotation.z <= 0.422f)
+        if (armRB.transform.rotation.z >= 0f && armRB.transform.rotation.z <= 0.8f)
         {
             armRB.transform.Rotate(0.0f, 0.0f, t_changeVal);
              
-             if(armRB.transform.rotation.z >= 0.422f)
+             if(armRB.transform.rotation.z >= 0.7f)
              {
                  Debug.Log("Hit Limit");
-                 armRB.transform.rotation = Quaternion.Euler( 0,0, 42f);
+                 armRB.transform.rotation = Quaternion.Euler( 0,0, 60f);
              }
-             if(armRB.transform.rotation.z <= -0.35f)
+             if(armRB.transform.rotation.z <= 0f)
              {
                  Debug.Log("Hit Limit");
-                 armRB.transform.rotation = Quaternion.Euler( 0,0, -36f);
+                 armRB.transform.rotation = Quaternion.Euler( 0,0, 22f);
              }
         }
     }
@@ -103,7 +144,7 @@ public class LaunchControls : MonoBehaviour
 
         rotation = armRB.transform.localRotation.z;
 
-        while (armRB.transform.rotation.z >= -0.86f)
+        while (armRB.transform.rotation.z >= -0.86f && isrotating)
         {
              armRB.transform.Rotate(0.0f, 0.0f, -WeigthForce);
             yield return null;
@@ -111,7 +152,9 @@ public class LaunchControls : MonoBehaviour
 
         if (armRB.transform.rotation.z <= -0.86f)
         {
+            Reset();
             isrotating = false;
+            yield break;
         }
          
          //armRB.transform.rotation = Quaternion.Euler(0, 0, 180);
@@ -125,7 +168,8 @@ public class LaunchControls : MonoBehaviour
             rotation = armRB.transform.localRotation.z;
             Debug.Log("rotation: " + rotation.ToString());
             Debug.Log("entered Collision");
-            Destroy(breakableJoint);
+            launchSound.Play();
+            breakableJoint.connectedBody = null;
         }
     }
 
