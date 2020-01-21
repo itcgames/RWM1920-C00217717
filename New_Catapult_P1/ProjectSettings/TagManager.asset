@@ -7,6 +7,7 @@ TagManager:
   - TrebArm
   - FullTrebBody
   - ball
+  - Wheel
   layers:
   - Default
   - TransparentFX
