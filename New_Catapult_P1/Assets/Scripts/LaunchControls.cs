@@ -18,7 +18,7 @@ public class LaunchControls : MonoBehaviour
 
     public GameObject weight;
 
-    bool isrotating = false;
+    public bool isrotating = false;
     float rotation = 0;
     float WeigthForce = 0;
 
