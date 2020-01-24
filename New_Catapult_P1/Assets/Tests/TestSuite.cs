@@ -8,7 +8,7 @@ using UnityEngine.UI;
 namespace Tests
 {
     [TestFixture]
-    public class ArmRotatesForLaunchTest
+    public class TestSuite
     {
         public LaunchControls armScript;
         GameObject catapult = new GameObject();
@@ -46,6 +46,24 @@ namespace Tests
            float NewZRotation = catapult.GetComponent<Rigidbody2D>().transform.localRotation.z;
 
            Assert.Less(NewZRotation, initialZRotation);
+
+        }
+
+        [UnityTest]
+        public IEnumerator TestMovement()
+        {
+
+            float initialXPosition = catapult.GetComponent<Rigidbody2D>().transform.localPosition.x;
+
+            Vector3 pos = catapult.transform.position;
+            pos.x += 2 * .1f;
+            catapult.transform.position = pos;
+
+            yield return new WaitForSeconds(0.05f);
+
+            float NewXPosition = catapult.GetComponent<Rigidbody2D>().transform.localPosition.x;
+
+            Assert.Greater(NewXPosition, initialXPosition);
 
         }
 
